@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ゼビウスエディッタ PS1版 Ver3.1</title>
+<title>ゼビウスエディッタ PS1版 Ver3.2</title>
 <style>:root{font-family:"Meiryo UI","Yu Gothic UI",sans-serif;color-scheme:dark}
 html,body{height:100%}
 body{margin:0;background:#171717;color:#eee;display:flex;flex-direction:column;overflow:hidden;font-size:14px}
@@ -136,7 +136,7 @@ table.lst input{width:100%;padding:2px 4px;font-family:Consolas,monospace}
 </style></head><body>
 <header>
  <div class="headerTitleRow">
-  <h1><span class="creatorLink">レトロゲームファンオリジナルゼビウスエディッタ</span><span class="creatorSep">|</span>PS1版（ナムコミュージアムVol.2）Ver3.1</h1>
+  <h1><span class="creatorLink">レトロゲームファンオリジナルゼビウスエディッタ</span><span class="creatorSep">|</span>PS1版（ナムコミュージアムVol.2）Ver3.2</h1>
   <span class="hbadge cap" id="capBadge">マップ容量: -</span>
   <span class="hbadge" id="discBadge">元ディスク: 未登録</span>
  </div>
@@ -1081,7 +1081,7 @@ const API={isoSector,build,wavesUsed,wavesRead,wavesPack,wavesToCsv,wavesFromCsv
 if(typeof module!=='undefined')module.exports=API; else root.NM2=API;
 })(typeof window!=='undefined'?window:globalThis);
 </script>
-<script>window.EDITOR_VER='3.1';</script>
+<script>window.EDITOR_VER='3.2';</script>
 <script>'use strict';
 // ===== PS1版ゼビウスエディッタ 画面側 =====
 const $=id=>document.getElementById(id);
@@ -2074,6 +2074,7 @@ main();
   const CHECK_EVERY_MS=12*60*60*1000;
   // 新しい版を出す時は、ここの先頭に1件足す (はじめに_PS1エディッタ.txt と同じ内容)
   const CHANGELOG=[
+    {v:'3.2',items:['エディッタのファイル名を英語の「XeviousEditor_PS1_VerX.Y.html」にしました（GitHubのダウンロードで名前が崩れないように）。中身と画面の表示は日本語のままです。']},
     {v:'3.1',items:['右上に「🔄 更新確認」と「🐞 不具合を報告」ボタンを追加しました（FC版エディッタと同じ仕組み）。','新しい版を初めて開いた時に、その版の変更点を表示するようにしました。']},
     {v:'3.0',items:['記憶した地上絵・マップパーツ・自機を、ファイルに書き出し／読み込みできるようにしました（まとめて・1種類ずつ）。']},
     {v:'2.9',items:['読み込んだ地上絵をブラウザに記憶し、何度でも置けるようにしました。','マップを切り取って「マップパーツ」として保存し、スタンプとして使い回せるようにしました。']},
