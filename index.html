@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ゼビウスエディッタ PS1版 Ver3.9</title>
+<title>ゼビウスエディッタ PS1版 Ver4.0</title>
 <style>:root{font-family:"Meiryo UI","Yu Gothic UI",sans-serif;color-scheme:dark}
 html,body{height:100%}
 body{margin:0;background:#171717;color:#eee;display:flex;flex-direction:column;overflow:hidden;font-size:14px}
@@ -136,7 +136,7 @@ table.lst input{width:100%;padding:2px 4px;font-family:Consolas,monospace}
 </style></head><body>
 <header>
  <div class="headerTitleRow">
-  <h1><span class="creatorLink">レトロゲームファンオリジナルゼビウスエディッタ</span><span class="creatorSep">|</span>PS1版（ナムコミュージアムVol.2）Ver3.9</h1>
+  <h1><span class="creatorLink">レトロゲームファンオリジナルゼビウスエディッタ</span><span class="creatorSep">|</span>PS1版（ナムコミュージアムVol.2）Ver4.0</h1>
   <span class="hbadge cap" id="capBadge">マップ容量: -</span>
   <span class="hbadge" id="discBadge">元ディスク: 未登録</span>
  </div>
@@ -419,6 +419,11 @@ table.lst input{width:100%;padding:2px 4px;font-family:Consolas,monospace}
      <div class="panelHead">地上絵（PNG画像をマップに貼る）</div>
      <div class="hint">画像を選ぶ → マップをクリックした所が左上になります。画像は8×8のタイルに分けて、ゲームの色(16色)に近い色で登録されます。同じ絵のタイルは1つにまとめます。足りない分は自動で大容量化（追加タイル最大3072個）。</div>
      <div class="palBody">
+      <div class="box" id="geoMeterBox" style="margin-bottom:8px;padding:8px 10px">
+       <div class="small" id="geoMeterTxt">背景タイルの空き: 計算中…</div>
+       <div style="height:12px;background:#333;border-radius:3px;overflow:hidden;margin-top:4px"><div id="geoMeterBar" style="height:100%;width:0;background:#4c4;transition:width .2s"></div></div>
+       <div class="small" style="color:#aaa;margin-top:2px">地上絵で新しく作るタイルが、空きのどれだけを使うかの目安です（全エリアの合計。同じ絵のマスは1つにまとまるので、同じ絵を何か所に置いても増えません）。</div>
+      </div>
       <div class="row"><label class="btn green">PNG画像を選ぶ<input type="file" id="geoFile" accept="image/png,image/*" hidden></label><span class="small" id="geoPend"></span></div>
       <div class="box" id="geoAdj" hidden style="margin-top:8px">
        <h3 style="margin:0 0 4px">大きさ・切り取り</h3>
@@ -439,7 +444,7 @@ table.lst input{width:100%;padding:2px 4px;font-family:Consolas,monospace}
        <div class="row" style="margin-top:6px"><button class="btn" id="geoExport">ファイルに書き出す (.json)</button><label class="btn">ファイルから読み込む<input type="file" id="geoImport" accept=".json" hidden></label></div>
       </div>
       <div class="small" style="margin-top:8px">マップに貼った地上絵（全エリア。行をダブルクリックでその場所へ）</div>
-      <div class="lstWrap" style="margin-top:4px"><table class="lst" id="geoTbl"><thead><tr><th>画像</th><th>エリア</th><th>行</th><th>列</th><th>大きさ</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="lstWrap" style="margin-top:4px"><table class="lst" id="geoTbl"><thead><tr><th>画像</th><th>エリア</th><th>行</th><th>列</th><th>大きさ</th><th>新しいタイル</th><th></th></tr></thead><tbody></tbody></table></div>
      </div>
     </div>
    </section>
@@ -1230,12 +1235,12 @@ function makePPF(disc,out,desc,ss){ss=ss||SECT;const d=new TextEncoder().encode(
         p32(h,0,pos%4294967296);p32(h,4,Math.floor(pos/4294967296));h[8]=j-i;parts.push(h,b.slice(i,j));i=j;}else i++;}}
   return concat(parts);}
 
-const API={isoSector,build,SECRET,secretCodes,NEWSOL,newsolBase,newsolNorm,NEWSND,adpcmDecode,adpcmEncode,wavesUsed,wavesRead,wavesPack,wavesToCsv,wavesFromCsv,AIR_NAMES,airName,neededLBAs,makePPF,rd,origMaps,toRows,bacuraCounts,parse,csvParse,getShip,fcShip,SHIP_PAL,enc,norm,LEN,NAMES,nameOf,
+const API={Tiles,pasteImage,isoSector,build,SECRET,secretCodes,NEWSOL,newsolBase,newsolNorm,NEWSND,adpcmDecode,adpcmEncode,wavesUsed,wavesRead,wavesPack,wavesToCsv,wavesFromCsv,AIR_NAMES,airName,neededLBAs,makePPF,rd,origMaps,toRows,bacuraCounts,parse,csvParse,getShip,fcShip,SHIP_PAL,enc,norm,LEN,NAMES,nameOf,
   EXE_LBA,EXE_SIZE,BIN_LBA,BIN_SIZE,SECT,fo,u16,u32,TIMOFF,CELLS,loadOrig,areaStarts,secfix,wlzComp,consts:C};
 if(typeof module!=='undefined')module.exports=API; else root.NM2=API;
 })(typeof window!=='undefined'?window:globalThis);
 </script>
-<script>window.EDITOR_VER='3.9';</script>
+<script>window.EDITOR_VER='4.0';</script>
 <script>'use strict';
 // ===== PS1版ゼビウスエディッタ 画面側 =====
 const $=id=>document.getElementById(id);
@@ -1953,7 +1958,10 @@ function geoAdjShow(light){const a=$('geoAdj');a.hidden=false;const {im,crop:c}=
   if(light)return;
   const cv=geoMake();const o=$('geoOut');const z=cv.width<=112?2:1;o.width=cv.width*z;o.height=cv.height*z;const og=o.getContext('2d');og.imageSmoothingEnabled=false;og.drawImage(cv,0,0,o.width,o.height);
   const nt=(cv.width/8)*(cv.height/8);const scr=Math.round(cv.height/240*100);
-  $('geoInfo').innerHTML='できあがり <b>'+cv.width+'×'+cv.height+'</b> ドット（タイル '+nt+' 個まで。同じ絵のタイルはまとまるので実際はもっと少なくなります）'+(cv.height>240?'<br>縦は画面約 '+scr+'% 分（画面の縦は約240ドット）':'')+(cv._ow!==cv.width||cv._oh!==cv.height?'<br>8の倍数にするため、右・下を端の色で伸ばしています':'');}
+  $('geoInfo').innerHTML='できあがり <b>'+cv.width+'×'+cv.height+'</b> ドット（タイル '+nt+' 個まで。同じ絵のタイルはまとまるので実際はもっと少なくなります）'+(cv.height>240?'<br>縦は画面約 '+scr+'% 分（画面の縦は約240ドット）':'')+(cv._ow!==cv.width||cv._oh!==cv.height?'<br>8の倍数にするため、右・下を端の色で伸ばしています':'')+'<br><span id="geoEst">新しく使うタイルを数えています…</span>';
+  const tk=geoAdjShow._tk=(geoAdjShow._tk||0)+1;geoUsage(rgbOfCanvas(cv)).then(u=>{if(!u||tk!==geoAdjShow._tk||!$('geoEst'))return;
+    if(u.add<0){$('geoEst').innerHTML='<span style="color:#f66">この画像は空きに入りきりません（のこり '+(u.cap-u.used)+' 個）。小さくするか、色の少ない絵にしてください</span>';return;}
+    const after=pct(u.used+u.add,u.cap);$('geoEst').innerHTML='この画像で新しく使うタイル <b>'+u.add+'</b> 個（空きの '+pct(u.add,u.cap)+'%）→ 貼ると合計 <b>'+after+'%</b>'+(after>=90?' <span style="color:#f88">（空きがほとんどなくなります）</span>':'');});}
 function placeGeo(p){const g=cur.geoPend;pushUndo('地上絵');S.images.push({name:g.name,w:g.w,h:g.h,url:g.url,area:cur.area+1,row:p.c,col:p.x,_img:g._img});cur.geoPend=null;$('geoPend').textContent='';dirty();fillGeo();blit();}
 // ---------- 登録した地上絵 (ブラウザに記憶) ----------
 async function geoLibAdd(g){const lib=(await DB.get('geoLib'))||[];if(lib.some(x=>x.url===g.url))return;let name=g.name;let n=2;while(lib.some(x=>x.name===name))name=g.name+'('+(n++)+')';
@@ -2003,11 +2011,33 @@ function setupParts(){$('partSave').onclick=partSave;
   $('partImport').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)await libImport(f,['partLib']);};
   partLibDraw();geoLibDraw();}
 function fillGeo(){S.images.forEach(im=>{if(im.url)geoLibAdd(im);});const tb=$('geoTbl').tBodies[0];tb.innerHTML='';S.images.forEach((im,i)=>{const tr=document.createElement('tr');
-  tr.innerHTML='<td>'+esc(im.name)+'</td><td>'+im.area+'</td><td><input class="gr" value="'+im.row+'" style="width:56px"></td><td><input class="gc" value="'+im.col+'" style="width:44px"></td><td>'+im.w+'×'+im.h+'</td><td><button class="btn red">削除</button></td>';
-  tr.querySelector('.gr').onchange=e=>{pushUndo('地上絵');im.row=Math.max(0,Math.min(285,parseInt(e.target.value)||0));dirty();blit();};
-  tr.querySelector('.gc').onchange=e=>{pushUndo('地上絵');im.col=Math.max(0,Math.min(27,parseInt(e.target.value)||0));dirty();blit();};
+  tr.innerHTML='<td>'+esc(im.name)+'</td><td>'+im.area+'</td><td><input class="gr" value="'+im.row+'" style="width:56px"></td><td><input class="gc" value="'+im.col+'" style="width:44px"></td><td>'+im.w+'×'+im.h+'</td><td class="gnt" style="text-align:right">…</td><td><button class="btn red">削除</button></td>';
+  tr.querySelector('.gr').onchange=e=>{pushUndo('地上絵');im.row=Math.max(0,Math.min(285,parseInt(e.target.value)||0));dirty();blit();geoMeterSoon();};
+  tr.querySelector('.gc').onchange=e=>{pushUndo('地上絵');im.col=Math.max(0,Math.min(27,parseInt(e.target.value)||0));dirty();blit();geoMeterSoon();};
   tr.querySelector('button').onclick=()=>{pushUndo('地上絵');S.images.splice(i,1);dirty();fillGeo();blit();};
-  tr.ondblclick=()=>{selectArea(im.area-1);scrollToY(im.row-1);};tb.appendChild(tr);});}
+  tr.ondblclick=()=>{selectArea(im.area-1);scrollToY(im.row-1);};tb.appendChild(tr);});geoMeterSoon();}
+// ---------- 背景タイルの空きメーター ----------
+// ディスクを作る時と同じ手順 (NM2.Tiles / pasteImage) で、貼った地上絵が新しく作るタイルを数える
+function rgbOfCanvas(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;const rgb=new Uint8Array(cv.width*cv.height*3);for(let p=0,q=0;p<d.length;p+=4){rgb[q++]=d[p];rgb[q++]=d[p+1];rgb[q++]=d[p+2];}return {w:cv.width,h:cv.height,rgb};}
+async function geoRGB(im){if(im._rgb&&im._rgbUrl===im.url)return im._rgb;im._rgb=await imgToRGB(im);im._rgbUrl=im.url;return im._rgb;}
+let GEO_U=null;
+// extra: {rgb} 置く前の画像 (あれば、貼った後にどうなるかも数える)
+async function geoUsage(extra){if(!EXE||!BN||!S||!S.maps)return null;const n=(S.opts&&S.opts.areas)||16;
+  const maps=S.maps.map(m=>m.map(r=>r.slice()));const inuse=new Set();for(const m of maps)for(const r of m)for(const v of r)inuse.add(v);
+  const T=new NM2.Tiles(EXE,BN.slice(),inuse);const cap=T.remain();const per=[];let full=false;
+  for(const im of S.images){if(im.area>n){per.push(null);continue;}const b=T.nnew;
+    try{NM2.pasteImage(T,maps,await geoRGB(im),im.area,im.row,im.col);}catch(e){full=true;per.push(null);continue;}per.push(T.nnew-b);}
+  const used=Math.min(cap,cap-T.remain());let add=null;if(extra){const b=T.nnew;
+    // 置く場所はまだ決まっていないので、数えるだけ (マップには書かない)
+    try{const img=extra;for(let ty=0;ty<img.h/8;ty++)for(let tx=0;tx<img.w/8;tx++){const px=[];for(let yy=0;yy<8;yy++)for(let xx=0;xx<8;xx++){const o=((ty*8+yy)*img.w+(tx*8+xx))*3;px.push(T.nearest(img.rgb[o],img.rgb[o+1],img.rgb[o+2]));}T.tileFor(px);}add=T.nnew-b;}
+    catch(e){add=-1;}}
+  return {cap,used,per,full,add};}
+function pct(a,b){return b>0?Math.round(a/b*1000)/10:0;}
+let geoTimer=null;function geoMeterSoon(){clearTimeout(geoTimer);geoTimer=setTimeout(geoMeter,150);}
+async function geoMeter(){const u=await geoUsage();if(!u)return;GEO_U=u;const p=pct(u.used,u.cap);
+  $('geoMeterTxt').innerHTML='背景タイルの空き: <b>'+u.used+' / '+u.cap+'</b> 個 使用（<b>'+p+'%</b>）　のこり '+(u.cap-u.used)+' 個'+(u.full?'　<span style="color:#f66">足りません！ 入りきらない地上絵があります</span>':'');
+  const bar=$('geoMeterBar');bar.style.width=Math.min(100,p)+'%';bar.style.background=u.full||p>=90?'#d44':p>=70?'#db3':'#4c4';
+  const cells=document.querySelectorAll('#geoTbl .gnt');u.per.forEach((v,i)=>{if(cells[i])cells[i].textContent=v==null?'×':v+'（'+pct(v,u.cap)+'%）';});}
 async function imgToRGB(im){const i=im._img||await loadImg(im.url);const cv=document.createElement('canvas');cv.width=im.w;cv.height=im.h;const g=cv.getContext('2d');g.drawImage(i,0,0);
   const d=g.getImageData(0,0,im.w,im.h).data;const rgb=new Uint8Array(im.w*im.h*3);for(let p=0,q=0;p<d.length;p+=4){rgb[q++]=d[p];rgb[q++]=d[p+1];rgb[q++]=d[p+2];}return {w:im.w,h:im.h,rgb};}
 
@@ -2384,6 +2414,7 @@ main();
   const CHECK_EVERY_MS=12*60*60*1000;
   // 新しい版を出す時は、ここの先頭に1件足す (はじめに_PS1エディッタ.txt と同じ内容)
   const CHANGELOG=[
+    {v:'4.0',items:['「🖼 地上絵」に、背景タイルの空きをどれだけ使っているかのメーター（％）を付けました。','画像を読み込んだ時に「この画像で新しく使うタイル」と「貼った後の合計％」を表示します。貼った地上絵の一覧にも、1枚ごとの新しいタイルの数を出します。']},
     {v:'3.9',items:['自作の音を読み込むとき、大きさを自動でそろえるようにしました（小さい音の MP3 などでも、ゲームの中で聞こえやすくなります）。']},
     {v:'3.8',items:['新ソルが爆弾で出た時の音を選べるようにしました（元のまま／ゼビウスの効果音14個のどれか／自作の音）。','自作の音は WAV などを読み込んで、元のゼビウスの音を消さずに足します（合計 約7.9秒まで）。エミュで、元の14個の音が変わらないことも確かめました。','「▶ 試し聞き」で、ディスクの中の効果音や読み込んだ音を聞けます。']},
     {v:'3.7',items:['新ソルの絵を、元のソルと同じ7枚のアニメにしました（出てくる途中の 0A〜0F の6枚と、出きった後の 10）。1枚ずつ描けます。描いていない枚は元のソルの絵です。','動きの見本、「10」から途中の6枚の下書きを作るボタン、ほかの新ソル・ほかの枚からのコピー（大きさが違う時は拡大・縮小）を追加しました。']},
